@@ -1,6 +1,8 @@
 import sys
 from setuptools import setup, find_packages
 
+py3k = sys.version_info >= (3,)
+
 version = '1.0b5-dev'
 
 long_description = (
@@ -14,9 +16,19 @@ long_description = (
     open('CHANGES.txt').read()
     + '\n')
 
-tests_require = [
-    'unittest2',
-    'Cheetah'],
+if py3k:
+    tests_require = []
+    requires = [
+        'setuptools',
+    ]
+else:
+    tests_require = [
+        'unittest2',
+        'Cheetah']
+    requires = [
+        'setuptools',
+        "Cheetah>1.0,<=2.2.1",
+    ]
 
 setup(name='templer.core',
       version=version,
@@ -54,10 +66,7 @@ setup(name='templer.core',
       include_package_data=True,
       platforms='Any',
       zip_safe=False,
-      install_requires=[
-          'setuptools',
-          "Cheetah>1.0,<=2.2.1",
-      ],
+      install_requires=requires,
       tests_require=tests_require,
       extras_require=dict(test=tests_require),
       entry_points="""
