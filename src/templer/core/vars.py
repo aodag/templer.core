@@ -1,5 +1,7 @@
+from __future__ import print_function
 import sys
 from templer.core.create import NoDefault
+from templer.core import compat
 
 
 ##########################################################################
@@ -82,18 +84,18 @@ class var(object):
         max_name = max([len(v.name) for v in vars])
         for var in vars:
             if var.description:
-                print '%s%s%s  %s' % (
+                print('%s%s%s  %s' % (
                     ' ' * indent,
                     var.name,
                     ' ' * (max_name - len(var.name)),
-                    var.description)
+                    var.description))
             else:
-                print '  %s' % var.name
+                print('  %s' % var.name)
             if var.default is not NoDefault:
-                print '      default: %r' % var.default
+                print('      default: %r' % var.default)
             if var.should_echo is True:
-                print '      should_echo: %s' % var.should_echo
-        print
+                print('      should_echo: %s' % var.should_echo)
+        print()
 
     @property
     def _is_structural(self):
@@ -107,7 +109,7 @@ class BooleanVar(var):
 
     def validate(self, value):
         #Get rid of bonus whitespace
-        if isinstance(value, basestring):
+        if isinstance(value, compat.string_types):
             value = value.strip().lower()
 
         #Map special cases to correct values.
@@ -128,7 +130,7 @@ class StringVar(var):
     _default_widget = 'string'
 
     def validate(self, value):
-        if not isinstance(value, basestring):
+        if not isinstance(value, compat.string_types):
             raise ValidationException("Not a string value: %s" % value)
 
         value = value.strip()
@@ -170,7 +172,7 @@ class OnOffVar(StringVar):
 
     def validate(self, value):
         #Get rid of bonus whitespace
-        if isinstance(value, basestring):
+        if isinstance(value, compat.string_types):
             value = value.strip().lower()
 
         #Map special cases to correct values.
@@ -198,7 +200,7 @@ class IntVar(var):
         return value
 
 
-MAXINT = sys.maxint
+MAXINT = compat.maxint
 MININT = -MAXINT-1
 
 
@@ -222,7 +224,7 @@ class BoundedIntVar(IntVar):
         # first validate that value is an integer
         try:
             val = super(BoundedIntVar, self).validate(value)
-        except ValidationException, e:
+        except ValidationException as e:
             raise e
 
         if not self.min <= val <= self.max:
@@ -239,7 +241,7 @@ class DottedVar(var):
 
     def validate(self, value):
         msg = "Not a valid Python dotted name: %s ('%s' is not an identifier)"
-        if not isinstance(value, basestring):
+        if not isinstance(value, compat.string_types):
             raise ValidationException("Not a string value: %s" % value)
         value = value.strip()
 

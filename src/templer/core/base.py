@@ -1,11 +1,16 @@
+from __future__ import print_function
 import os
 import sys
 import pkg_resources
 from copy import copy
 
 from textwrap import TextWrapper
-import ConfigParser
-from ConfigParser import SafeConfigParser
+#import ConfigParser
+#from ConfigParser import SafeConfigParser
+from templer.core.compat import (
+    ConfigParser,
+    SafeConfigParser,
+)
 
 from templer.core import pluginlib
 from templer.core import copydir
@@ -39,8 +44,8 @@ def wrap_help_paras(wrapper, text):
 
     for idx, para in enumerate(text.split("\n\n")):
         if idx:
-            print
-        print wrapper.fill(para)
+            print()
+        print(wrapper.fill(para))
 
 
 def get_zopeskel_prefs():
@@ -176,7 +181,7 @@ class Template(object): # pragma: no cover
     def write_files(self, command, output_dir, vars):
         template_dir = self.template_dir()
         if not os.path.exists(output_dir):
-            print "Creating directory %s" % output_dir
+            print("Creating directory %s" % output_dir)
             if not command.simulate:
                 # Don't let copydir create this top-level directory,
                 # since copydir will svn add it sometimes:
@@ -294,8 +299,8 @@ $HOME/.zopeskel file.
                 print_commands.append('  %s  %s' %
                                         (name, this_command.load().summary))
             print_commands = '\n'.join(print_commands)
-            print '-' * 78
-            print """\
+            print('-' * 78)
+            print("""\
 The project you just created has local commands. These can be used from within
 the product.
 
@@ -304,8 +309,8 @@ usage: paster COMMAND
 Commands:
 %s
 
-For more information: paster help COMMAND""" % print_commands
-            print '-' * 78
+For more information: paster help COMMAND""" % print_commands)
+            print('-' * 78)
 
     def print_zopeskel_message(self, msg_name):
         """ print a message stored as an attribute of the template
@@ -316,9 +321,9 @@ For more information: paster help COMMAND""" % print_commands
                     initial_indent="**  ",
                     subsequent_indent="**  ",
                     )
-            print "\n" + '*'*74
+            print("\n" + '*'*74)
             wrap_help_paras(textwrapper, msg)
-            print '*'*74 + "\n"
+            print('*'*74 + "\n")
 
     def readable_license_options(self):
         output = ["The following licenses are available:\n", ]
@@ -520,8 +525,8 @@ For more information: paster help COMMAND""" % print_commands
                         if response is not self.null_value_marker:
                             try:
                                 response = var.validate(response)
-                            except ValidationException, e:
-                                print e
+                            except ValidationException as e:
+                                print(e)
                                 response = self.null_value_marker
                 elif var.default is NoDefault:
                     errors.append('Required variable missing: %s'

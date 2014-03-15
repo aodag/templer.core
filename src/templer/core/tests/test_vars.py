@@ -15,6 +15,7 @@ from templer.core.vars import OnOffVar
 from templer.core.vars import IntVar
 from templer.core.vars import BoundedIntVar
 from templer.core.vars import ValidationException
+from templer.core import compat
 
 
 class test_var(unittest.TestCase):
@@ -134,7 +135,7 @@ class test_BoundedIntVar(unittest.TestCase):
         self.bivar = BoundedIntVar('name', 'description', min=3, max=10)
         self.defaultminvar = BoundedIntVar('name', 'description', max=10)
         self.defaultmaxvar = BoundedIntVar('name', 'description', min=3)
-        self.max = sys.maxint
+        self.max = compat.maxint
         self.min = -self.max - 1
 
     def testValidation(self):

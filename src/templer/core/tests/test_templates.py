@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 
 __docformat__ = 'restructuredtext'
 
@@ -27,7 +28,7 @@ def rmdir(*args):
 
 def templer(cmd, runner=None, silent=False):
     if not silent:
-        print "templer %s" % cmd
+        print("templer %s" % cmd)
     from templer.core.control_script import run
     args = cmd.split()
     kwargs = {'exit': False}
@@ -72,9 +73,9 @@ def ls(*args):
             # very predictable. Hide them.
             if filename.endswith('.egg'):
                 continue
-            print filename
+            print(filename)
     else:
-        print 'No directory named %s' % dirname
+        print('No directory named %s' % dirname)
 
 
 def cd(*args):
@@ -89,9 +90,9 @@ def config(filename):
 def cat(*args):
     filename = os.path.join(*args)
     if os.path.isfile(filename):
-        print open(filename).read()
+        print(open(filename).read())
     else:
-        print 'No file named %s' % filename
+        print('No file named %s' % filename)
 
 
 def touch(*args, **kwargs):

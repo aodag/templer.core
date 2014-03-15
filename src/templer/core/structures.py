@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import os
 
@@ -29,7 +30,7 @@ class Structure(object):
         structure_dirs = self.structure_dir()
         if len(structure_dirs) > 0:
             if not os.path.exists(output_dir):
-                print "Creating directory %s" % output_dir
+                print("Creating directory %s" % output_dir)
                 if not command.simulate:
                     os.makedirs(output_dir)
             for structure_dir in structure_dirs:

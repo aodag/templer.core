@@ -1,7 +1,11 @@
+from __future__ import print_function
 # (c) 2005 Ian Bicking and contributors; written for Paste (http://pythonpaste.org)
 # Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 
-import ConfigParser
+#import ConfigParser
+from templer.core.compat import (
+    ConfigParser,
+)
 import difflib
 import fnmatch
 import getpass
@@ -180,17 +184,17 @@ class Command(object):
             response = raw_input(prompt).strip().lower()
             if not response:
                 if default in ('careful', 'none'):
-                    print 'Please enter yes or no'
+                    print('Please enter yes or no')
                     continue
                 return default
             if default == 'careful':
                 if response in ('yes', 'no'):
                     return response == 'yes'
-                print 'Please enter "yes" or "no"'
+                print('Please enter "yes" or "no"')
                 continue
             if response[0].lower() in ('y', 'n'):
                 return response[0].lower() == 'y'
-            print 'Y or N please'
+            print('Y or N please')
 
     def challenge(self, prompt, default=NoDefault, should_echo=True):
         """
@@ -303,12 +307,12 @@ class Command(object):
         if not os.path.exists(dir):
             self.ensure_dir(os.path.dirname(dir))
             if self.verbose:
-                print 'Creating %s' % self.shorten(dir)
+                print('Creating %s' % self.shorten(dir))
             if not self.simulate:
                 os.mkdir(dir)
         else:
             if self.verbose > 1:
-                print "Directory already exists: %s" % self.shorten(dir)
+                print("Directory already exists: %s" % self.shorten(dir))
 
     def ensure_file(self, filename, content):
         """
@@ -321,7 +325,7 @@ class Command(object):
         self.ensure_dir(os.path.dirname(filename))
         if not os.path.exists(filename):
             if self.verbose:
-                print 'Creating %s' % filename
+                print('Creating %s' % filename)
             if not self.simulate:
                 f = open(filename, 'wb')
                 f.write(content)
@@ -332,16 +336,16 @@ class Command(object):
         f.close()
         if content == old_content:
             if self.verbose > 1:
-                print 'File %s matches expected content' % filename
+                print('File %s matches expected content' % filename)
             return
         if not self.options.overwrite:
-            print 'Warning: file %s does not match expected content' % filename
+            print('Warning: file %s does not match expected content' % filename)
             diff = difflib.context_diff(
                 content.splitlines(),
                 old_content.splitlines(),
                 'expected ' + filename,
                 filename)
-            print '\n'.join(diff)
+            print('\n'.join(diff))
             if self.interactive:
                 while 1:
                     s = raw_input(
@@ -352,12 +356,12 @@ class Command(object):
                         break
                     if s.startswith('n'):
                         return
-                    print 'Unknown response; Y or N please'
+                    print('Unknown response; Y or N please')
             else:
                 return
 
         if self.verbose:
-            print 'Overwriting %s with new content' % filename
+            print('Overwriting %s with new content' % filename)
         if not self.simulate:
             f = open(filename, 'wb')
             f.write(content)
@@ -382,8 +386,8 @@ class Command(object):
             # If we are doing a simulation, it's expected that some
             # files won't exist...
             if self.verbose:
-                print 'Would (if not simulating) insert text into %s' % (
-                    self.shorten(filename))
+                print('Would (if not simulating) insert text into %s' % (
+                    self.shorten(filename)))
             return
 
         f = open(filename)
@@ -397,8 +401,8 @@ class Command(object):
                 if (lines[i:] and len(lines[i:]) > 1 and
                     ''.join(lines[i + 1:]).strip().startswith(text.strip())):
                     # Already have it!
-                    print 'Warning: line already found in %s (not inserting' % filename
-                    print '  %s' % lines[i]
+                    print('Warning: line already found in %s (not inserting' % filename)
+                    print('  %s' % lines[i])
                     return
 
                 if indent:
@@ -412,11 +416,11 @@ class Command(object):
                 "Marker '-*- %s -*-' not found in %s"
                 % (marker_name, filename))
             if 1 or self.simulate:  # @@: being permissive right now
-                print 'Warning: %s' % errstr
+                print('Warning: %s' % errstr)
             else:
                 raise ValueError(errstr)
         if self.verbose:
-            print 'Updating %s' % self.shorten(filename)
+            print('Updating %s' % self.shorten(filename))
         if not self.simulate:
             f = open(filename, 'w')
             f.write(''.join(lines))
@@ -462,7 +466,7 @@ class Command(object):
                                     cwd=cwd,
                                     stderr=stderr_pipe,
                                     stdout=subprocess.PIPE)
-        except OSError, e:
+        except OSError as e:
             if e.errno != 2:
                 # File not found
                 raise
@@ -470,27 +474,27 @@ class Command(object):
                 "The expected executable %s was not found (%s)"
                 % (cmd, e))
         if self.verbose:
-            print 'Running %s %s' % (cmd, ' '.join(args))
+            print('Running %s %s' % (cmd, ' '.join(args)))
         if simulate:
             return None
         stdout, stderr = proc.communicate()
         if proc.returncode and not expect_returncode:
             if not self.verbose:
-                print 'Running %s %s' % (cmd, ' '.join(args))
-            print 'Error (exit code: %s)' % proc.returncode
+                print('Running %s %s' % (cmd, ' '.join(args)))
+            print('Error (exit code: %s)' % proc.returncode)
             if stderr:
-                print stderr
+                print(stderr)
             raise OSError("Error executing command %s" % cmd)
         if self.verbose > 2:
             if stderr:
-                print 'Command error output:'
-                print stderr
+                print('Command error output:')
+                print(stderr)
             if stdout:
-                print 'Command output:'
-                print stdout
+                print('Command output:')
+                print(stdout)
         elif proc.returncode and warn_returncode:
-            print 'Warning: command failed (%s %s)' % (cmd, ' '.join(args))
-            print 'Exited with code %s' % proc.returncode
+            print('Warning: command failed (%s %s)' % (cmd, ' '.join(args)))
+            print('Exited with code %s' % proc.returncode)
         return stdout
 
     def quote_first_command_arg(self, arg):
@@ -534,17 +538,17 @@ class Command(object):
             f.close()
             if content == old_content:
                 if self.verbose:
-                    print 'File %s exists with same content' % (
-                        self.shorten(filename))
+                    print('File %s exists with same content' % (
+                        self.shorten(filename)))
                 return
             if (not self.simulate and self.options.interactive):
                 if not self.ask('Overwrite file %s?' % filename):
                     return
         if self.verbose > 1 and source:
-            print 'Writing %s from %s' % (self.shorten(filename),
-                                          self.shorten(source))
+            print('Writing %s from %s' % (self.shorten(filename),
+                                          self.shorten(source)))
         elif self.verbose:
-            print 'Writing %s' % self.shorten(filename)
+            print('Writing %s' % self.shorten(filename))
         if not self.simulate:
             already_existed = os.path.exists(filename)
             if binary:
@@ -689,13 +693,13 @@ class CreateDistroCommand(Command):
         if self.options.list_variables:
             return self.list_variables(templates)
         if self.verbose:
-            print 'Selected and implied templates:'
+            print('Selected and implied templates:')
             max_tmpl_name = max([len(tmpl_name) for tmpl_name, tmpl in templates])
             for tmpl_name, tmpl in templates:
-                print '  %s%s  %s' % (
+                print('  %s%s  %s' % (
                     tmpl_name, ' '*(max_tmpl_name-len(tmpl_name)),
-                    tmpl.summary)
-            print
+                    tmpl.summary))
+            print()
         if not self.args:
             if self.interactive:
                 dist_name = self.challenge('Enter project name')
@@ -760,7 +764,7 @@ class CreateDistroCommand(Command):
         
     def create_template(self, template, output_dir, vars):
         if self.verbose:
-            print 'Creating template %s' % template.name
+            print('Creating template %s' % template.name)
         template.run(self, output_dir, vars)
 
     ignore_egg_info_files = [
@@ -810,30 +814,30 @@ class CreateDistroCommand(Command):
     def display_vars(self, vars):
         vars = vars.items()
         vars.sort()
-        print 'Variables:'
+        print('Variables:')
         max_var = max([len(n) for n, v in vars])
         for name, value in vars:
-            print '  %s:%s  %s' % (
-                name, ' '*(max_var-len(name)), value)
+            print('  %s:%s  %s' % (
+                name, ' '*(max_var-len(name)), value))
         
     def list_templates(self):
         templates = []
         for entry in self.all_entry_points():
             try:
                 templates.append(entry.load()(entry.name))
-            except Exception, e:
+            except Exception as e:
                 # We will not be stopped!
-                print 'Warning: could not load entry point %s (%s: %s)' % (
-                    entry.name, e.__class__.__name__, e)
+                print('Warning: could not load entry point %s (%s: %s)' % (
+                    entry.name, e.__class__.__name__, e))
         max_name = max([len(t.name) for t in templates])
         templates.sort(lambda a, b: cmp(a.name, b.name))
-        print 'Available templates:'
+        print('Available templates:')
         for template in templates:
             # @@: Wrap description
-            print '  %s:%s  %s' % (
+            print('  %s:%s  %s' % (
                 template.name,
                 ' '*(max_name-len(template.name)),
-                template.summary)
+                template.summary))
         
     def inspect_files(self, output_dir, templates, vars):
         file_sources = {}
@@ -881,7 +885,7 @@ class CreateDistroCommand(Command):
             for ext in self._ignore_filenames:
                 if fnmatch.fnmatch(name, ext):
                     if self.verbose > 1:
-                        print '%sIgnoring %s' % (pad, name)
+                        print('%sIgnoring %s' % (pad, name))
                     skip_this = True
                     break
             if skip_this:
@@ -889,16 +893,16 @@ class CreateDistroCommand(Command):
             partial = os.path.join(join, name)
             if partial not in file_sources:
                 if self.verbose > 1:
-                    print '%s%s (not from template)' % (pad, name)
+                    print('%s%s (not from template)' % (pad, name))
                 continue
             templates = file_sources.pop(partial)
-            print '%s%s from:' % (pad, name)
+            print('%s%s from:' % (pad, name))
             for template in templates:
-                print '%s  %s' % (pad, template.name)
+                print('%s  %s' % (pad, template.name))
         for dir in dirs:
             if dir in self._ignore_dirs:
                 continue
-            print '%sRecursing into %s/' % (pad, dir)
+            print('%sRecursing into %s/' % (pad, dir))
             self._show_files(
                 output_dir, file_sources,
                 join=os.path.join(join, dir),
@@ -907,15 +911,15 @@ class CreateDistroCommand(Command):
     def _show_leftovers(self, output_dir, file_sources):
         if not file_sources:
             return
-        print
-        print 'These files were supposed to be generated by templates'
-        print 'but were not found:'
+        print()
+        print('These files were supposed to be generated by templates')
+        print('but were not found:')
         file_sources = file_sources.items()
         file_sources.sort()
         for partial, templates in file_sources:
-            print '  %s from:' % partial
+            print('  %s from:' % partial)
             for template in templates:
-                print '    %s' % template.name
+                print('    %s' % template.name)
 
     def list_variables(self, templates):
         for tmpl_name, tmpl in templates:
@@ -928,10 +932,10 @@ class CreateDistroCommand(Command):
 
     def _show_template_vars(self, tmpl_name, tmpl, message=None):
         title = '%s (from %s)' % (tmpl.name, tmpl_name)
-        print title
-        print '-' * len(title)
+        print(title)
+        print('-' * len(title))
         if message is not None:
-            print '  %s' % message
-            print
+            print('  %s' % message)
+            print()
             return
         tmpl.print_vars(indent=2)

@@ -76,9 +76,9 @@ def _get_templates(template_entry_points, klass):
                                              'Local Commands'),
                          'help': getattr(template, 'help', "").strip(),
                          'entry': entry})
-        except Exception, e:
+        except Exception as e:
             # We will not be stopped!
-            print 'Warning: could not load entry point %s (%s: %s)' % (
-                entry.name, e.__class__.__name__, e)
+            print('Warning: could not load entry point %s (%s: %s)' % (
+                entry.name, e.__class__.__name__, e))
     return templates
     

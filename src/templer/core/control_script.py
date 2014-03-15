@@ -1,13 +1,18 @@
+from __future__ import print_function
 import sys
 import os
-import ConfigParser
 import pkg_resources
-from cStringIO import StringIO
 from textwrap import TextWrapper
 
 from templer.core.base import wrap_help_paras
 from templer.core.create import CreateDistroCommand
 from templer.core.ui import list_sorted_templates
+from templer.core.compat import ConfigParser
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 
 try:
     from templer.localcommands.command import TemplerLocalCommand
@@ -303,10 +308,10 @@ class Runner(object):
         """
         try:
             template_name, output_name, args = self._process_args(argv)
-        except SyntaxError, e:
+        except SyntaxError as e:
             self.usage()
             msg = "ERROR: There was a problem with your arguments: %s\n"
-            print msg % str(e)
+            print(msg % str(e))
             raise
 
         rez = pkg_resources.iter_entry_points(
@@ -315,14 +320,14 @@ class Runner(object):
         rez = list(rez)
         if not rez:
             self.usage()
-            print "ERROR: No such template: %s\n" % template_name
+            print("ERROR: No such template: %s\n" % template_name)
             return 1
 
         template = rez[0].load()
-        print "\n%s: %s" % (template_name, template.summary)
+        print("\n%s: %s" % (template_name, template.summary))
         help = getattr(template, 'help', None)
         if help:
-            print template.help
+            print(template.help)
 
         command = CreateDistroCommand()
 
@@ -339,44 +344,44 @@ class Runner(object):
             if output_name:
                 try:
                     self._checkdots(template, output_name)
-                except ValueError, e:
-                    print "ERROR: %s\n" % str(e)
+                except ValueError as e:
+                    print("ERROR: %s\n" % str(e))
                     raise
             else:
                 ndots = getattr(template, 'ndots', None)
                 help = DOT_HELP.get(ndots)
                 while True:
                     if help:
-                        print help
+                        print(help)
                     try:
                         challenge = "Enter project name (or q to quit)"
                         output_name = command.challenge(challenge)
                         if output_name == 'q':
-                            print "\n\nExiting...\n"
+                            print("\n\nExiting...\n")
                             return 0
                         self._checkdots(template, output_name)
-                    except ValueError, e:
-                        print "\nERROR: %s" % e
+                    except ValueError as e:
+                        print("\nERROR: %s" % e)
                         raise
                     else:
                         break
 
-            print self.texts['help_prompt']
+            print(self.texts['help_prompt'])
 
         try:
             command.run(['-q', '-t', template_name] + args + special_args)
         except KeyboardInterrupt:
-            print "\n\nExiting...\n"
+            print("\n\nExiting...\n")
             return 0
-        except Exception, e:
-            print "\nERROR: %s\n" % str(e)
+        except Exception as e:
+            print("\nERROR: %s\n" % str(e))
             raise
         return 0
 
     # Public API methods, can be overridden by templer-based applications
     def show_help(self):
         """display help text"""
-        print self.texts['description'] % {'script_name': self.name}
+        print(self.texts['description'] % {'script_name': self.name})
         return 0
 
     def generate_dotfile(self):
@@ -384,14 +389,14 @@ class Runner(object):
         """
 
         cats = list_sorted_templates(scope=self.allowed_packages)
-        print self.texts['dotfile_header'] % {'script_name': self.name}
+        print(self.texts['dotfile_header'] % {'script_name': self.name})
         for temp in sum(cats.values(), []):
-            print "\n[%(name)s]\n" % temp
+            print("\n[%(name)s]\n" % temp)
             tempc = temp['entry'].load()
             for var in tempc.vars:
                 if hasattr(var, 'pretty_description'):
-                    print "# %s" % var.pretty_description()
-                print "# %s = %s\n" % (var.name, var.default)
+                    print("# %s" % var.pretty_description())
+                print("# %s = %s\n" % (var.name, var.default))
         return 0
 
     def list_verbose(self):
@@ -402,22 +407,22 @@ class Runner(object):
         cats = list_sorted_templates(scope=self.allowed_packages)
         if cats:
             for title, items in cats.items():
-                print "\n"+ title
-                print "-" * len(title)
+                print("\n"+ title)
+                print("-" * len(title))
                 # Hard-coded for now, since 'add' is the only one
                 if title == 'Local Commands':
-                    print '\nadd: Allows the addition of further templates'\
-                          ' from the following list'
-                    print '     to an existing package\n'
-                    print '\nLocal Templates'
-                    print '-----------------'
+                    print('\nadd: Allows the addition of further templates'\
+                          ' from the following list')
+                    print('     to an existing package\n')
+                    print('\nLocal Templates')
+                    print('-----------------')
                 for temp in items:
-                    print "\n%s: %s\n" % (temp['name'], temp['summary'])
+                    print("\n%s: %s\n" % (temp['name'], temp['summary']))
                     if temp['help']:
                         wrap_help_paras(textwrapper, temp['help'])
-            print
+            print()
         else:
-            print self.texts['not_here_warning']
+            print(self.texts['not_here_warning'])
 
         return 0
 
@@ -425,8 +430,8 @@ class Runner(object):
         """show installed version of packages listed in self.versions
         """
         version_info = self._get_version_info()
-        print self._format_version_info(
-            version_info, "Installed Templer Packages")
+        print(self._format_version_info(
+            version_info, "Installed Templer Packages"))
         return 0
 
     def usage(self):
@@ -437,14 +442,14 @@ class Runner(object):
         if self.allowed_packages in ['all', 'local']:
             local = '[<local-command>] '
 
-        print self.texts['usage'] % {'templates': templates,
+        print(self.texts['usage'] % {'templates': templates,
                                      'local': local,
                                      'script_name': self.name,
-                                     'dotfile_name': self.dotfile}
+                                     'dotfile_name': self.dotfile})
         return 0
 
     def no_locals(self):
-        print self.texts['no_localcommands_warning']
+        print(self.texts['no_localcommands_warning'])
 
     # Private API supporting command-line flags
     # should not need to be changed by templer-based applications
@@ -461,7 +466,7 @@ class Runner(object):
                 return result
         else:
             # situation 1, fail and report.
-            print self.texts['no_localcommands_warning']
+            print(self.texts['no_localcommands_warning'])
             return 1
 
     def _get_templer_packages(self):
@@ -490,12 +495,12 @@ class Runner(object):
         maxpkg = max([len(vi[0]) for vi in version_info])
         maxver = max([len(vi[1]) for vi in version_info])
         if header is not None:
-            print >>s, "\n| %s" % header
-            print >>s, "+" + ("-" * (maxpkg + maxver + 3))
+            print("\n| %s" % header, file=s)
+            print("+" + ("-" * (maxpkg + maxver + 3)), file=s)
         for vi in version_info:
             padding = maxpkg - len(vi[0])
             values = [vi[0], ' ' * padding, vi[1]]
-            print >>s, "| %s:%s %s" % tuple(values)
+            print("| %s:%s %s" % tuple(values), file=s)
         s.seek(0)
         return s.read()
 
@@ -509,19 +514,19 @@ class Runner(object):
             templates = sum(cats.values(), [])   # flatten into single list
             max_name = max([len(x['name']) for x in templates])
             for title, items in cats.items():
-                print >>s, "\n%s\n" % title
+                print("\n%s\n" % title, file=s)
                 # Hard-coded for now, since 'add' is the only one
                 if title == 'Local Commands':
-                    print >>s, "|  add: Allows the addition of further"\
-                          " templates from the following list"
-                    print >>s, "        to an existing package\n"
+                    print("|  add: Allows the addition of further"\
+                          " templates from the following list", file=s)
+                    print("        to an existing package\n", file=s)
                 for entry in items:
-                    print >>s, "|  %s:%s %s\n" % (
+                    print("|  %s:%s %s\n" % (
                          entry['name'],
                         ' '*(max_name-len(entry['name'])),
-                        entry['summary']),
+                        entry['summary']), file=s)
         else:
-            print >>s, self.texts['not_here_warning']
+            print(self.texts['not_here_warning'], file=s)
 
         s.seek(0)
         return s.read()
@@ -610,7 +615,7 @@ class Runner(object):
                 f = open(changes_txt, 'rb')
                 content = f.read()
                 f.close()
-                if 'Package created using templer' in content:
+                if b'Package created using templer' in content:
                     made_by_templer = True
 
             (cwd, tail) = os.path.split(cwd)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 # (c) 2005 Ian Bicking and contributors; written for Paste (http://pythonpaste.org)
 # Licensed under the MIT license: http://www.opensource.org/licenses/mit-license.php
 
@@ -8,7 +9,11 @@ import pkg_resources
 import string
 import urllib
 
-import Cheetah.Template
+try:
+    import Cheetah.Template
+    no_cheetah = False
+except ImportError:
+    no_cheetah = True
 
 
 class SkipTemplate(Exception):
@@ -72,11 +77,11 @@ def copy_dir(source,
     pad = ' ' * (indent * 2)
     if not os.path.exists(dest):
         if verbosity >= 1:
-            print '%sCreating %s/' % (pad, dest)
+            print('%sCreating %s/' % (pad, dest))
         if not simulate:
             makedirs(dest, verbosity=verbosity, pad=pad)
     elif verbosity >= 2:
-        print '%sDirectory %s exists' % (pad, dest)
+        print('%sDirectory %s exists' % (pad, dest))
 
     for name in names:
         if use_pkg_resources:
@@ -87,7 +92,7 @@ def copy_dir(source,
         if reason:
             if verbosity >= 2:
                 reason = pad + reason % {'filename': full}
-                print reason
+                print(reason)
             continue
         if sub_vars:
             dest_full = os.path.join(dest, substitute_filename(name, vars))
@@ -97,7 +102,7 @@ def copy_dir(source,
             sub_file = sub_vars
         if use_pkg_resources and pkg_resources.resource_isdir(source[0], full):
             if verbosity:
-                print '%sRecursing into %s' % (pad, os.path.basename(full))
+                print('%sRecursing into %s' % (pad, os.path.basename(full)))
             copy_dir((source[0], full), dest_full, vars, verbosity, simulate,
                      indent=indent + 1, use_cheetah=use_cheetah,
                      sub_vars=sub_vars, interactive=interactive,
@@ -105,7 +110,7 @@ def copy_dir(source,
             continue
         elif not use_pkg_resources and os.path.isdir(full):
             if verbosity:
-                print '%sRecursing into %s' % (pad, os.path.basename(full))
+                print('%sRecursing into %s' % (pad, os.path.basename(full)))
             copy_dir(full, dest_full, vars, verbosity, simulate,
                      indent=indent + 1, use_cheetah=use_cheetah,
                      sub_vars=sub_vars, interactive=interactive,
@@ -133,7 +138,7 @@ def copy_dir(source,
             f.close()
             if old_content == content:
                 if verbosity:
-                    print '%s%s already exists (same content)' % (pad, dest_full)
+                    print('%s%s already exists (same content)' % (pad, dest_full))
                 continue
             if interactive:
                 if not query_interactive(
@@ -143,9 +148,9 @@ def copy_dir(source,
             elif not overwrite:
                 continue
         if verbosity and use_pkg_resources:
-            print '%sCopying %s to %s' % (pad, full, dest_full)
+            print('%sCopying %s to %s' % (pad, full, dest_full))
         elif verbosity:
-            print '%sCopying %s to %s' % (pad, os.path.basename(full), dest_full)
+            print('%sCopying %s to %s' % (pad, os.path.basename(full), dest_full))
         if not simulate:
             f = open(dest_full, 'wb')
             f.write(content)
@@ -198,9 +203,9 @@ def query_interactive(src_fn, dest_fn, src_content, dest_content,
         msg = '; %i lines removed' % (removed - added)
     else:
         msg = ''
-    print 'Replace %i bytes with %i bytes (%i/%i lines changed%s)' % (
+    print('Replace %i bytes with %i bytes (%i/%i lines changed%s)' % (
         len(dest_content), len(src_content),
-        removed, len(dest_content.splitlines()), msg)
+        removed, len(dest_content.splitlines()), msg))
     prompt = 'Overwrite %s [y/n/d/B/?] ' % dest_fn
     while 1:
         if all_answer is None:
@@ -214,14 +219,14 @@ def query_interactive(src_fn, dest_fn, src_content, dest_content,
             while os.path.exists(new_dest_fn):
                 n += 1
                 new_dest_fn = dest_fn + '.bak' + str(n)
-            print 'Backing up %s to %s' % (dest_fn, new_dest_fn)
+            print('Backing up %s to %s' % (dest_fn, new_dest_fn))
             if not simulate:
                 shutil.copyfile(dest_fn, new_dest_fn)
             return True
         elif response.startswith('all '):
             rest = response[4:].strip()
             if not rest or rest[0] not in ('y', 'n', 'b'):
-                print query_usage
+                print(query_usage)
                 continue
             response = all_answer = rest[0]
         if response[0] == 'y':
@@ -229,11 +234,11 @@ def query_interactive(src_fn, dest_fn, src_content, dest_content,
         elif response[0] == 'n':
             return False
         elif response == 'dc':
-            print '\n'.join(c_diff)
+            print('\n'.join(c_diff))
         elif response[0] == 'd':
-            print '\n'.join(u_diff)
+            print('\n'.join(u_diff))
         else:
-            print query_usage
+            print(query_usage)
 
 query_usage = """\
 Responses:
@@ -270,9 +275,11 @@ def substitute_content(content, vars, filename='<string>',
         tmpl = LaxTemplate(content)
         try:
             return tmpl.substitute(TypeMapper(v))
-        except Exception, e:
+        except Exception as e:
             _add_except(e, ' in file %s' % filename)
             raise
+    if no_cheetah:
+        raise Exception("In python3, Cheetah template is not supported.")
     tmpl = Cheetah.Template.Template(source=content,
                                      searchList=[vars])
     return careful_sub(tmpl, vars, filename)
@@ -302,18 +309,18 @@ def sub_catcher(filename, vars, func, *args, **kw):
     """
     try:
         return func(*args, **kw)
-    except SkipTemplate, e:
-        print 'Skipping file %s' % filename
+    except SkipTemplate as e:
+        print('Skipping file %s' % filename)
         if str(e):
-            print str(e)
+            print(str(e))
         raise
-    except Exception, e:
-        print 'Error in file %s:' % filename
+    except Exception as e:
+        print('Error in file %s:' % filename)
         if isinstance(e, NameError):
             items = vars.items()
             items.sort()
             for name, value in items:
-                print '%s = %r' % (name, value)
+                print('%s = %r' % (name, value))
         raise
 
 
@@ -397,7 +404,7 @@ class TypeMapper(dict):
 def eval_with_catch(expr, vars):
     try:
         return eval(expr, vars)
-    except Exception, e:
+    except Exception as e:
         _add_except(e, 'in expression %r' % expr)
         raise
 

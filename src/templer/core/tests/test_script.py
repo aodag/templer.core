@@ -5,7 +5,7 @@ except ImportError:
     import unittest
 
 import sys
-import StringIO
+from templer.core.compat import StringIO
 
 # from templer.core.control_script import checkdots
 # from templer.core.control_script import process_args

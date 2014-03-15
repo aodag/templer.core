@@ -10,7 +10,7 @@ def resolve_plugins(plugin_list):
         plugin = plugin_list.pop()
         try:
             pkg_resources.require(plugin)
-        except pkg_resources.DistributionNotFound, e:
+        except pkg_resources.DistributionNotFound as e:
             msg = '%sNot Found%s: %s (did you run python setup.py develop?)'
             if str(e) != plugin:
                 e.args = (msg % (str(e) + ': ', ' for', plugin)),
