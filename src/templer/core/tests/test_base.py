@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 from templer.core.base import BaseTemplate, get_var
 from templer.core.create import CreateDistroCommand
